@@ -7,25 +7,13 @@
 
 library(tidyverse)
 
-### Get paths to subdirectories
+list.files() # narrows to 2 subdirectories
 
-# I don't like using non-relative paths, but it seems necessary in this case
-
-# Root for the local git repository 
-path_default <- getwd() 
-path_default
-# [1] "C:/Users/Charles.Burks/my_git/Etude3
-list.files(path_default, pattern = "Y22-") # narrows to 2 subdirectories
-
-# path for Etude3 subdirectory containing DPR files
-path_subdir <- paste0(path_default,"/Y22-03-07-cal_dpr_pest_use_report")
-path_subdir
-# [1] "C:/Users/Charles.Burks/my_git/Etude3/Y22-03-07-cal_dpr_pest_use_report"
-list.files(path_subdir) # demonstrates valid path
+list.files("./pur2018") # demonstrates valid path
 
 # path for second level DPR subdirectory containing 2018 data
 path_dat <- paste0(path_subdir,"/pur2018")
-list.files(path_dat)
+list.files(path_dat) #76 files
 # [1] "adjuvant_info.pdf"      "cd_doc.pdf"             "changes2018.txt"       
 # [4] "chem_cas.txt"           "chemical.txt"           "county.txt"            
 # [7] "debug.log"              "diagram.pdf"            "error_descriptions.txt"
@@ -36,10 +24,10 @@ list.files(path_dat)
 # [22] "udc18_03.txt"           "udc18_04.txt"           "udc18_05.txt"          
 
 ### Examine files containing crop names
+read_csv("./pur2018/site.txt")
 
-
-
-mysites <- read.csv(paste0(path_dat,"/site.txt2"))
+mysites <- read_csv("./pur2018/site2.txt")
+mysites
 #   site_code site_name
 # 1      3000      NUTS
 # 2      3001    ALMOND
@@ -54,17 +42,20 @@ mysites <- read.csv(paste0(path_dat,"/site.txt2"))
 ### udc18_01.txt, udc18_02.txt, udc18_03.txt. Append extracted files into 
 ### a single data frame
 
-x <- read_csv(paste0(path_dat,"/udc18_01.txt"))
-#    read application data for 1 of 58 counties
+### Example of county-level site data for 2018
+x <- read_csv("./pur2018/udc18_01.txt")
+x
+# A tibble: 36,453 x 35
+#   use_no prodno chem_code prodchem_pct lbs_chm_used lbs_prd_used amt_prd_used unit_of_meas acre_planted
+#   <dbl>  <dbl>     <dbl>        <dbl>        <dbl>        <dbl>        <dbl> <chr>               <dbl>
+# 1 3337041  62971      6004         17.6        0.726        4.12          56   OZ                  10.4 
+# 2 3337236  62971      6004         17.6        1.04         5.89          80   OZ                  48.1 
 
-select(x,site_loc_id) # 
-#    35 variables! site_loc_id is a key one, examine it
-#    reveals that site_loc_id defaults to character
+x %>% 
+  filter(site_code %in% c(3001,3009,3011))
+  # reduces number of records from 36,453 to 102
 
-x$site_loc_id <- as.numeric(x$site_loc_id)
-#    convert charcter to numeric. NAs introduced--how many?
+###Create a function to extract site_code %in% c(3001,3009,3011) from 
+###all ucd18*.txt and deposit to a separate (smaller) data frame
 
-sum(is.na(x$site_loc_id))/nrow(x)
-#    lost 14% of observations. Important? Too soon to tell
 
-y <- filter(x,site_loc_id %in% c(3001,3009,3011))
