@@ -1,0 +1,6 @@
+site_code,site_name
+3000,"NUTS"
+3001,"ALMOND"
+3009,"WALNUT"
+3011,"PISTACHIO"
+
