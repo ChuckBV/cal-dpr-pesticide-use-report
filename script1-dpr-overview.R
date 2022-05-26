@@ -51,7 +51,14 @@ x
 # 1 3337041  62971      6004         17.6        0.726        4.12          56   OZ                  10.4 
 # 2 3337236  62971      6004         17.6        1.04         5.89          80   OZ                  48.1 
 
-x %>% 
+### Get list of input files
+input_files <- list.files("./pur2018",
+           pattern = "udc18")
+
+### Use a list as input, and perform this operation on each file
+### Below is quasi-pseudocode. We want output files 1 to 56 for input_files[1]
+### to input_files[56]
+y_i <- x_i %>% 
   filter(site_code %in% c(3001,3009,3011))
   # reduces number of records from 36,453 to 102
 
