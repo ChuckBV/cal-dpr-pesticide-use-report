@@ -28,6 +28,13 @@ chemicals
 # 3      1158          200 ABIETIC ACID            
 # 4      1212          300 ABIETIC ANHYDRIDE  
 
+product <- read_csv("./pur2018/product.txt")
+product
+# A tibble: 64,749 x 29
+#   prodno mfg_firmno reg_firmno label_seq_no revision_no fut_firmno prodstat_ind product_name
+glimpse(product)
+
+
 #-- 1. Find NOW Mating disruption active ingredient -----------------------
 chemicals %>% 
   #filter(str_detect(chemname,"HEXADEC")) -- returns 13 lines
@@ -43,3 +50,14 @@ chemicals %>%
 almond_chems <- read_csv("now-almond-insecticide2.txt")
 pist_chems <- read_csv("now-pistachio-insecticide2.txt")
 walnut__chems <- read_csv("now-walnut-insecticide2.txt")
+
+nut_chems <- bind_rows(list(almond_chems,pist_chems,walnut__chems))
+
+nut_chems <- nut_chems %>% 
+  group_by(chemname) %>% 
+  summarise(nObs = n())
+
+chem_list <- nut_chems$chemname
+
+chemicals %>% 
+  filter(chem_list %in% chemname)
