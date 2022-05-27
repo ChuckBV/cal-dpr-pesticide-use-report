@@ -52,17 +52,29 @@ x
 # 2 3337236  62971      6004         17.6        1.04         5.89          80   OZ                  48.1 
 
 ### Get list of input files
-input_files <- list.files("./pur2018",
-           pattern = "udc18")
+file_names <- list.files(path = "./pur2018", 
+                         recursive = TRUE,
+                         pattern = "udc18",
+                         full.names = TRUE)
+
+### Combine 56 files of County data
+input_files <- read_csv(file_names, id = "file_name")
 
 ### Use a list as input, and perform this operation on each file
 ### Below is quasi-pseudocode. We want output files 1 to 56 for input_files[1]
 ### to input_files[56]
-y_i <- x_i %>% 
+
+
+nut_apps <- input_files %>% 
   filter(site_code %in% c(3001,3009,3011))
-  # reduces number of records from 36,453 to 102
+glimpse(nut_apps)
 
-###Create a function to extract site_code %in% c(3001,3009,3011) from 
-###all ucd18*.txt and deposit to a separate (smaller) data frame
+### Leaves us with ca. 602,000 records of applications to almond, walnut, and
+### pistachio sites in 2018. 35 columns. County names are embedding in file
+### names. Next challenges
+# 1) Replace "file_name" with County name
+# 2) Extract all chem_code used, and link that to a chemical name
 
-
+### Gets to 2 real-world questions
+# 1) What pesticides were used most often? and
+# 2) Do pesticide patterns vary between counties?
