@@ -77,4 +77,4 @@ glimpse(nut_apps)
 
 ### Gets to 2 real-world questions
 # 1) What pesticides were used most often? and
-# 2) Do pesticide patterns vary between counties?
+# 2) Does which pesticide is most often used vary between counties?
