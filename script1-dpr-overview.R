@@ -65,7 +65,7 @@ glimpse(nut_apps)
 ### Leaves us with ca. 602,000 records of applications to almond, walnut, and
 ### pistachio sites in 2018. 35 columns. County names are embedding in file
 ### names. Next challenges
-# 1) Replace "file_name" with County name
+# 1) Use nut_apps$county_cd and county.txt to get county names into nut apps
 # 2) Extract all chem_code used, and link that to a chemical name
 
 ### Gets to 2 real-world questions
