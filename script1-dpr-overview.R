@@ -12,8 +12,7 @@ list.files() # narrows to 2 subdirectories
 list.files("./pur2018") # demonstrates valid path
 
 # path for second level DPR subdirectory containing 2018 data
-path_dat <- paste0(path_subdir,"/pur2018")
-list.files(path_dat) #76 files
+list.files("./pur2018") #76 files
 # [1] "adjuvant_info.pdf"      "cd_doc.pdf"             "changes2018.txt"       
 # [4] "chem_cas.txt"           "chemical.txt"           "county.txt"            
 # [7] "debug.log"              "diagram.pdf"            "error_descriptions.txt"
@@ -43,19 +42,12 @@ mysites
 ### a single data frame
 
 ### Example of county-level site data for 2018
-x <- read_csv("./pur2018/udc18_01.txt")
-x
-# A tibble: 36,453 x 35
-#   use_no prodno chem_code prodchem_pct lbs_chm_used lbs_prd_used amt_prd_used unit_of_meas acre_planted
-#   <dbl>  <dbl>     <dbl>        <dbl>        <dbl>        <dbl>        <dbl> <chr>               <dbl>
-# 1 3337041  62971      6004         17.6        0.726        4.12          56   OZ                  10.4 
-# 2 3337236  62971      6004         17.6        1.04         5.89          80   OZ                  48.1 
 
 ### Get list of input files
 file_names <- list.files(path = "./pur2018", 
                          recursive = TRUE,
                          pattern = "udc18",
-                         full.names = TRUE)
+                         full.names = FALSE)
 
 ### Combine 56 files of County data
 input_files <- read_csv(file_names, id = "file_name")
@@ -64,9 +56,10 @@ input_files <- read_csv(file_names, id = "file_name")
 ### Below is quasi-pseudocode. We want output files 1 to 56 for input_files[1]
 ### to input_files[56]
 
-
 nut_apps <- input_files %>% 
   filter(site_code %in% c(3001,3009,3011))
+nut_apps
+
 glimpse(nut_apps)
 
 ### Leaves us with ca. 602,000 records of applications to almond, walnut, and
