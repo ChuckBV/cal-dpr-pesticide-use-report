@@ -13,7 +13,7 @@ list.files("./pur2018") # demonstrates valid path
 
 # path for second level DPR subdirectory containing 2018 data
 path_dat <- paste0(path_subdir,"/pur2018")
-list.files(path_dat) #76 files
+list.files("./pur2018") #76 files
 # [1] "adjuvant_info.pdf"      "cd_doc.pdf"             "changes2018.txt"       
 # [4] "chem_cas.txt"           "chemical.txt"           "county.txt"            
 # [7] "debug.log"              "diagram.pdf"            "error_descriptions.txt"
@@ -24,10 +24,10 @@ list.files(path_dat) #76 files
 # [22] "udc18_03.txt"           "udc18_04.txt"           "udc18_05.txt"          
 
 ### Examine files containing crop names
-# read_csv("./pur2018/site.txt") # working dir is pur2018 so not needed
-read_csv("./site.txt")
+read_csv("./pur2018/site.txt") # working dir is pur2018 so not needed
+# read_csv("./site.txt")
 
-mysites <- read_csv("./site2.txt")# add back in pur2018/
+mysites <- read_csv("./pur2018/site2.txt")# add back in pur2018/
 
 mysites
 #   site_code site_name
@@ -45,7 +45,7 @@ mysites
 ### a single data frame
 
 ### Example of county-level site data for 2018
-x <- read_csv("./udc18_01.txt")
+x <- read_csv("./pur2018/udc18_01.txt")
 x
 # A tibble: 36,453 x 35
 #   use_no prodno chem_code prodchem_pct lbs_chm_used lbs_prd_used amt_prd_used unit_of_meas acre_planted
@@ -76,45 +76,65 @@ glimpse(nut_apps)
 ### names. Next challenges
 # 1) Replace "file_name" with County name
 list.files()                                      #trying to see where the county file was 
-read_csv("county.txt")                            #getting names
-county_names <- read_csv("county.txt")            
-x <- nut_apps                                     # making coppy of the data 
+read_csv("./pur2018/county.txt")                            #getting names
+county_names <- read_csv("./pur2018/county.txt")            
 # x$county_cd[x$county_cd == "01"] <- "ALAMEDA"     #soo this dose work but kinda repetitive not to keen on doing this 58 times
 
 #x$county_cd[x$county_cd == county_names]
 # data_merged0 <- merge(x , county_names)
-data_merged1 <- left_join(x, county_names, by = c())
-#merg files 
-#left join 
-# ggplot(data = data_merged)+
-#   geom_point(mapping = aes(y= county_names)
-table(data_merged$county_cd)
-table(data_merged$couty_name)#just trying to get an idea on what county had the preferred nuts
+#data_merged1 <- left_join(x, county_names, by = c())
 
-list.files(pattern="udc18_")#to get the names of the files 
+data_merged1 <- left_join(county_names,nut_apps) # County names now in file
 
-file.rename(list.files(pattern="udc18_"), 
-            str_replace(list.files(pattern="udc18_"), pattern="udc18_", "")) # to simplify the names of the data 
-                                                    # ^old pattern      ^ new pattern
+x <- data_merged1 %>% 
+  group_by(couty_name) %>% 
+  summarise(nObs = n()) %>% 
+  arrange(desc(nObs)) %>% 
+  filter(nObs > 1000) 
+x
+# A tibble: 17 x 2
+#   couty_name   nObs
+#   <chr>       <int>
+# 1 STANISLAUS  95494
+# 2 KERN        80671
+# 3 SAN JOAQUIN 63389
+
+x <- x %>% 
+  mutate(county_name = fct_infreq(couty_name)) 
+x
+
+### Plot applications to nut crop by county, top 17 counties
+ggplot(x, aes(x = county_name, y = nObs)) +
+  geom_col() +
+  coord_flip()
+  # refinenment need. Replace x and y labels. Get bars to sore
+  # by nObs
+
+
+
 # 2) Extract all chem_code used, and link that to a chemical name
-read_csv("county.txt")
-#narrow to nuts 
-table(data_merged$chem_code)
-##############useless for now wrong approach 
-# ggplot(data = data_merged)+
-#   geom_point(mapping = aes(y= chem_code, x = couty_name))
 
-# ggplot(data = data_merged, mapping = aes(y= chem_code, x = couty_name))+
-#   geom_boxplot()
-#############
-old_chem_code  <- read_csv("chemical.txt")
+old_chem_code  <- read_csv("./pur2018/chemical.txt")
 chem_code <- subset(old_chem_code, select= -c(chemalpha_cd))
-data_merged1 <- left_join(data_merged, chem_code, by = c())
-         
-  
+    # Could also be accomplished with dplyr::select() or with df[,c(1,3)]
+data_merged2 <- left_join(chem_code,data_merged1)
+data_merged2         
+# A tibble: 432,728 x 38
+#   chem_code chemname  county_cd couty_name file_name            use_no prodno prodchem_pct lbs_chm_used lbs_prd_used amt_prd_used unit_of_meas acre_planted
+#       <dbl> <chr>     <chr>     <chr>      <chr>                 <dbl>  <dbl>        <dbl>        <dbl>        <dbl>        <dbl> <chr>               <dbl>
+# 1      2254 ABAMECTIN 01        ALAMEDA    ./pur2018/udc18_01.~ 2.01e6  62903         8           9.87        123.        2000    OZ                  500  
+# 2      2254 ABAMECTIN 01        ALAMEDA    ./pur2018/udc18_01.~ 2.01e6  62903         8           0.560         7.00       114.   OZ                   28.4
+# 3      2254 ABAMECTIN 01        ALAMEDA    ./pur2018/udc18_01.~ 2.01e6  62903         8           1.58         19.7        320    OZ                   80    
 
 ### Gets to 2 real-world questions
 # 1) What pesticides were used most often? and
+
+data_merged2 %>% 
+  group_by(chem_code,chemname) %>% 
+  summarise(nObs = n()) %>% 
+  filter(nObs > 1000) %>% 
+  arrange(desc(nObs))
+
 
 
 # 2) Does which pesticide is most often used vary between counties?
